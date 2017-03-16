@@ -56,7 +56,7 @@ def slide_window(img, x_start_stop=[None, None], y_start_stop=[None, None], xy_w
     # Return the list of windows
     return window_list
 
-def search_windows(img, clf, windows, scaler, orient, pix_per_cell, cell_per_block):
+def search_windows(img, clf, windows, scaler, orient, pix_per_cell, cell_per_block, color_space = 'RGB', spatial_size=(32, 32), hist_bins=32, hog_channel = 'ALL', spatial_feat=True, hist_feat=True, hog_feat=True):
     on_windows = []
     #iterate over all the windows
     for window_size in windows:
@@ -64,7 +64,7 @@ def search_windows(img, clf, windows, scaler, orient, pix_per_cell, cell_per_blo
             test_img = cv2.resize(img[window[0][1]:window[1][1], window[0][0]:window[1][0]], (64, 64))
             # test_img = cv2.cvtColor(test_img, cv2.COLOR_RGB2GRAY)
             #Extract features for that window
-            features = extract_features(test_img, orient, pix_per_cell, cell_per_block)
+            features = np.concatenate(extract_features(test_img, orient, pix_per_cell, cell_per_block, color_space, spatial_size, hist_bins, hog_channel, spatial_feat, hist_feat, hog_feat))
             #Scale extracted features to be fed to classifier
             test_features = scaler.transform(np.array(features).reshape(1, -1))
             #Predict using classifier
