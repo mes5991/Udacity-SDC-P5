@@ -68,8 +68,8 @@ if 'test_window' in options:
 
 def train_classifier(orient, pix_per_cell, cell_per_block, color_space, spatial_size, hist_bins, hog_channel, spatial_feat, hist_feat, hog_feat, save_model):
     #Get training image paths
-    car_train_path = r'C:\Users\mes59\Documents\Udacity\SDC\Term 1\Project 5\Training Data\vehicles'
-    not_car_train_path = r'C:\Users\mes59\Documents\Udacity\SDC\Term 1\Project 5\Training Data\non-vehicles'
+    car_train_path = r'Training Data\vehicles'
+    not_car_train_path = r'Training Data\non-vehicles'
     vehicle_files = [f for f in glob.glob(car_train_path + '/**/*.png', recursive=False)]
     non_vehicle_files = [f for f in glob.glob(not_car_train_path + '/**/*.png', recursive=False)]
 
@@ -137,7 +137,7 @@ if 'pipeline_images' in options:
     # Check the score of the SVC
     print('Test Accuracy of SVC = ', round(svc.score(X_test, y_test), 4))
 
-    test_imgs_path = r'C:\Users\mes59\Documents\Udacity\SDC\Term 1\Project 5\CarND-Vehicle-Detection-master\test_images'
+    test_imgs_path = r'CarND-Vehicle-Detection-master\test_images'
     test_imgs = [f for f in glob.glob(test_imgs_path + '/*.jpg', recursive=False)]
 
     for test_img in test_imgs:
@@ -168,30 +168,33 @@ if 'pipeline_video' in options:
     hist_feat = True
     hog_feat = True
 
-    save_model = True #Do I need to train a classifier? False if classifier is already saved
+    save_model = False #Do I need to train a classifier? False if classifier is already saved
     svc, X_scaler, X_train, X_test, y_train, y_test = train_classifier(orient, pix_per_cell, cell_per_block, color_space, spatial_size, hist_bins, hog_channel, spatial_feat, hist_feat, hog_feat, save_model)
 
     if save_model:
         # Check the score of the SVC
         print('Test Accuracy of SVC = ', round(svc.score(X_test, y_test), 4))
 
-    video_path = r'C:\Users\mes59\Documents\Udacity\SDC\Term 1\Project 5\CarND-Vehicle-Detection-master\project_video.mp4'
+    video_path = r'CarND-Vehicle-Detection-master\project_video.mp4'
     cap = cv2.VideoCapture(video_path)
 
-    #Open video writer
-    # fourcc = cv2.VideoWriter_fourcc(*'DIVX')
-    # videoout = cv2.VideoWriter('output.avi',fourcc, 30.0,( 1280,720))
+    # Open video writer
+    fourcc = cv2.VideoWriter_fourcc(*'DIVX')
+    videoout = cv2.VideoWriter('output.avi',fourcc, 30.0,( 1280,720))
 
-    c = 0
+    frame = 0
+    t = time.time()
     while(cap.isOpened()):
         ret, img = cap.read()
         if not ret:
             break
-        c+=1
-        if c < 190:
-            continue
-        # if i % 100 == 0:
-        #     print("FRAME: ", i)
+        frame+=1
+        # if frame < 200:
+        #     continue
+        # if frame % 10 == 0:
+        #     continue
+        if frame % 100 == 0:
+            print("FRAME: ", frame)
 
         # small_windows = slide_window(img, x_start_stop=[None, None], y_start_stop=[380, 450],
         #                 xy_window=(32,32), xy_overlap=(.5,.5))
@@ -214,20 +217,22 @@ if 'pipeline_video' in options:
         # Add heat to each box in box list
         heat = add_heat(heat,hot_windows)
         # Apply threshold to help remove false positives
-        heat = apply_threshold(heat,4)
+        heat = apply_threshold(heat,1)
         # Visualize the heatmap when displaying
         heatmap = np.clip(heat, 0, 255)
         # Find final boxes from heatmap using label function
         labels = label(heatmap)
         draw_img = draw_labeled_bboxes(np.copy(img), labels)
 
-        # #Write to output video
-        # videoout.write(draw_img)
+        #Write to output video
+        videoout.write(draw_img)
 
-        cv2.imshow("Boxed", draw_img)
-        cv2.imshow("HeatMap", heatmap)
-        cv2.imshow("window_img", window_img)
-        if cv2.waitKey(1) & 0xFF == ord('q'):
-            break
+        # cv2.imshow("Boxed", draw_img)
+        # cv2.imshow("HeatMap", heatmap)
+        # cv2.imshow("window_img", window_img)
+        # if cv2.waitKey(1) & 0xFF == ord('q'):
+        #     break
     cap.release()
     cv2.destroyAllWindows()
+    t2 = time.time()
+    print("Video processing took ", round(t2 - t, 2), "seconds")

@@ -76,12 +76,12 @@ def search_windows(img, clf, windows, scaler, orient, pix_per_cell, cell_per_blo
 
 def find_cars(img, ystart, ystop, scale, svc, X_scaler, orient, pix_per_cell, cell_per_block, spatial_size, hist_bins):
 
-    draw_img = np.copy(img)
     # img = img.astype(np.float32)/255
 
     img_tosearch = img[ystart:ystop,:,:]
     ctrans_tosearch = cv2.cvtColor(img_tosearch, cv2.COLOR_BGR2YCrCb)
-    ctrans_tosearch = ctrans_tosearch.astype(np.float32)/255
+    # ctrans_tosearch = cv2.cvtColor(img_tosearch, cv2.COLOR_BGR2YUV)
+    # ctrans_tosearch = ctrans_tosearch.astype(np.float32)/255
 
     if scale != 1:
         imshape = ctrans_tosearch.shape
@@ -128,12 +128,9 @@ def find_cars(img, ystart, ystop, scale, svc, X_scaler, orient, pix_per_cell, ce
             spatial_features = bin_spatial(subimg, size=spatial_size)
             hist_features = color_hist(subimg, nbins=hist_bins)
 
-            features = np.concatenate([spatial_features, hist_features, hog_feat1, hog_feat2, hog_feat3])
-            features = features.reshape(1,-1)
             # Scale features and make a prediction
-            # test_features = X_scaler.transform(np.hstack((spatial_features, hist_features, hog_features)).reshape(1, -1))
+            test_features = X_scaler.transform(np.hstack((spatial_features, hist_features, hog_features)).reshape(1, -1))
             #test_features = X_scaler.transform(np.hstack((shape_feat, hist_feat)).reshape(1, -1))
-            test_features = X_scaler.transform(features)
             test_prediction = svc.predict(test_features)
 
             if test_prediction == 1:
