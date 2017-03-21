@@ -18,53 +18,61 @@ from heatMap import *
 options = sys.argv
 
 if "test_hog" in options:
-    image_folder_far =  r'C:\Users\mes59\Documents\Udacity\SDC\Term 1\Project 5\Training Data\vehicles\GTI_Far'
-    image_folder_left =  r'C:\Users\mes59\Documents\Udacity\SDC\Term 1\Project 5\Training Data\vehicles\GTI_Left'
-    image_folder_middle =  r'C:\Users\mes59\Documents\Udacity\SDC\Term 1\Project 5\Training Data\vehicles\GTI_MiddleClose'
-    image_folder_right =  r'C:\Users\mes59\Documents\Udacity\SDC\Term 1\Project 5\Training Data\vehicles\GTI_Right'
-    image_folder_kitti =  r'C:\Users\mes59\Documents\Udacity\SDC\Term 1\Project 5\Training Data\vehicles\KITTI_extracted'
-    image_folders = [image_folder_far, image_folder_left, image_folder_middle, image_folder_right, image_folder_kitti]
-    for folder in image_folders:
-        imgs = os.listdir(folder)
-        for i in range(3):
-            ind = np.random.randint(0, len(imgs))
-            img_path = folder + '\\' + imgs[ind]
-            img = mpimg.imread(img_path)
-            gray = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
+    test_img_path = r'Images\vehicle_image.png'
+    test_img_path = r'Images\not_vehicle_image.png'
+    img = mpimg.imread(test_img_path)
+    img = cv2.cvtColor(img, cv2.COLOR_RGB2YCrCb)
 
-            # Define HOG parameters
-            orient = 9
-            pix_per_cell = 8
-            cell_per_block = 2
+    # Define HOG parameters
+    orient = 9 #HOG
+    pix_per_cell = 8 #HOG
+    cell_per_block = 2 #HOG
 
-            features, hog_image = get_hog_features(gray, orient, pix_per_cell, cell_per_block, vis=True, feature_vec=False)
+    hog_features = []
+    hog_images = []
+    for channel in range(img.shape[2]):
+        features, hog_image = get_hog_features(img[:,:,channel], orient, pix_per_cell, cell_per_block, vis=True, feature_vec=False)
+        hog_features.append(features)
+        hog_images.append(hog_image)
 
-            plt.subplot(121)
-            plt.imshow(img, cmap='gray')
-            plt.title('Example Car Image')
-            plt.subplot(122)
-            plt.imshow(hog_image, cmap='gray')
-            plt.title('HOG Visualization')
-            plt.show()
+    img = cv2.cvtColor(img, cv2.COLOR_YCrCb2RGB)
+    plt.subplot(221)
+    plt.imshow(img)
+    plt.title('Example Not Car Image')
+    plt.subplot(222)
+    plt.imshow(hog_images[0], cmap='gray')
+    plt.title('HOG Visualization - Channel 0')
+    plt.subplot(223)
+    plt.imshow(hog_images[1], cmap='gray')
+    plt.title('HOG Visualization - Channel 1')
+    plt.subplot(224)
+    plt.imshow(hog_images[2], cmap='gray')
+    plt.title('HOG Visualization - Channel 2')
+    plt.show()
 
 if 'test_window' in options:
-    test_imgs_path = r'C:\Users\mes59\Documents\Udacity\SDC\Term 1\Project 5\CarND-Vehicle-Detection-master\test_images'
+    test_imgs_path = r'CarND-Vehicle-Detection-master\test_images'
     test_imgs = [f for f in glob.glob(test_imgs_path + '/*.jpg', recursive=False)]
     print(len(test_imgs))
     for test_img in test_imgs:
         img = cv2.imread(test_img)
-        small_windows = slide_window(img, x_start_stop=[None, None], y_start_stop=[380, 500],
+        small_windows = slide_window(img, x_start_stop=[None, None], y_start_stop=[400, 500],
+                        xy_window=(51,51), xy_overlap=(.75,.75))
+        med_windows = slide_window(img, x_start_stop=[None, None], y_start_stop=[400, img.shape[0]-160],
                         xy_window=(64,64), xy_overlap=(.75,.75))
-        med_windows = slide_window(img, x_start_stop=[None, None], y_start_stop=[None, 550],
-                        xy_window=(160,160), xy_overlap=(.75,.75))
-        big_windows = slide_window(img, x_start_stop=[None, None], y_start_stop=[336,img.shape[0]],
-                        xy_window=(256,256), xy_overlap=(.5,.5))
+        big_windows = slide_window(img, x_start_stop=[None, None], y_start_stop=[400,656],
+                        xy_window=(96,96), xy_overlap=(.75,.75))
+        bigger_windows = slide_window(img, x_start_stop=[None, None], y_start_stop=[400,656],
+                        xy_window=(128,128), xy_overlap=(.75,.75))
+        img = draw_boxes(img, bigger_windows, color=(0, 0, 255), thick=7)
         img = draw_boxes(img, big_windows, color=(255, 0, 0), thick=6)
         img = draw_boxes(img, med_windows, color=(0, 255, 0), thick=3)
         img = draw_boxes(img, small_windows, color=(0, 0, 255), thick=1)
 
-        plt.imshow(img)
-        plt.show()
+        cv2.imshow("Sliding Window", img)
+        cv2.imwrite("Sliding Window.png", img)
+        if cv2.waitKey(-1) & 0xFF == ord('q'):
+            break
 
 def train_classifier(orient, pix_per_cell, cell_per_block, color_space, spatial_size, hist_bins, hog_channel, spatial_feat, hist_feat, hog_feat, save_model):
     #Get training image paths
@@ -195,19 +203,12 @@ if 'pipeline_video' in options:
         #     continue
         if frame % 100 == 0:
             print("FRAME: ", frame)
+        # if frame == 450:
+        #     break
 
-        # small_windows = slide_window(img, x_start_stop=[None, None], y_start_stop=[380, 450],
-        #                 xy_window=(32,32), xy_overlap=(.5,.5))
-        # med_windows = slide_window(img, x_start_stop=[None, None], y_start_stop=[None, 550],
-        #                 xy_window=(150,150), xy_overlap=(.75,.75))
-        # big_windows = slide_window(img, x_start_stop=[None, None], y_start_stop=[380, img.shape[0]],
-        #                 xy_window=(256,256), xy_overlap=(0.9, .8))
-        # windows = [small_windows, med_windows, big_windows]
-        # hot_windows = search_windows(img, svc, windows, X_scaler, orient, pix_per_cell, cell_per_block, color_space = color_space, spatial_size=spatial_size, hist_bins=hist_bins, hog_channel = hog_channel, spatial_feat=spatial_feat, hist_feat=hist_feat, hog_feat=hog_feat)
-
-        scale = [1.5,1,0.8]
-        ystart = [400,400,400]
-        ystop = [656,img.shape[0]-160,500]
+        scale = [2,1.5,1,0.8]
+        ystart = [400,400,400,400]
+        ystop = [656,656,img.shape[0]-160,500]
         hot_windows = []
         for i in range(len(scale)):
             hot_windows = hot_windows + find_cars(img, ystart[i], ystop[i], scale[i], svc, X_scaler, orient, pix_per_cell, cell_per_block, spatial_size, hist_bins)
@@ -217,7 +218,7 @@ if 'pipeline_video' in options:
         # Add heat to each box in box list
         heat = add_heat(heat,hot_windows)
         # Apply threshold to help remove false positives
-        heat = apply_threshold(heat,1)
+        heat = apply_threshold(heat,3)
         # Visualize the heatmap when displaying
         heatmap = np.clip(heat, 0, 255)
         # Find final boxes from heatmap using label function
