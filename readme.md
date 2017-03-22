@@ -5,8 +5,8 @@
   - [Video Implementation](#video-implementation)
   - [Filtering False Positives](#filtering-false-positives)
   - [Discussion](#discussion)
-  
-#Udacity SDC Project 5 - Vehicle Detection and Tracking
+
+# Udacity SDC Project 5 - Vehicle Detection and Tracking
 
 In this project for Udacity's Self-Driving Car Nanodegree, an image processing and classification pipeline was implemented in python to detect and track vehicles for highway driving. Given for the project was a video of highway driving from the perspective of a forward facing camera centered on the vehicle. Additionally, a set of labeled images for both vehicles and non-vehicles was provided for classifier training.
 
@@ -18,7 +18,7 @@ The goals / steps of the project were the following:
 * Run the pipeline on a video stream and create a heat map of recurring detections frame by frame to reject outliers and follow detected vehicles.
 * Estimate a bounding box for vehicles detected.
 
-##Feature Extraction
+## Feature Extraction
 A Histogram of Oriented Gradients (HOG) was implemented for feature extraction while training the classifier and searching for vehicles. My implementation utilizes the scikit HOG module for HOG feature extraction. I found the [scikit documentation](http://scikit-image.org/docs/dev/api/skimage.feature.html?highlight=feature%20hog#skimage.feature.hog) and the [tutorial](http://scikit-image.org/docs/dev/auto_examples/features_detection/plot_hog.html) to be extremely useful in understanding HOG and using the module.
 
 There are a few parameters that I spent time tuning to improve HOG feature extraction. These parameters are:
@@ -37,10 +37,10 @@ Additional feature extraction was implemented using binned color features, as we
 
 All parameters started at values suggested by Udacity lectures (and in some cases didn't change), but were modified and settled on through experimental analysis.
 
-##Classifier Training
+## Classifier Training
 I chose, per Udacity's suggestion, to use a Linear SVM classifier. Scikit was utilized again, specifically the [liner support vector classifier module](http://scikit-learn.org/stable/modules/generated/sklearn.svm.LinearSVC.html#sklearn.svm.LinearSVC) with default parameters. The implementation can be found in the `train_classifier()` function in the [main.py](main.py) file. Additionally, [scikit's standard scalar module](http://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.StandardScaler.html) was utilized to scale the extracted features to zero mean and unit variance.
 
-##Sliding Window
+## Sliding Window
 To search for cars using a trained classifier, a sliding window algorithm was implemented that searches specific areas of an image and predicts a binary (car or no car) value for that area. In order to capture vehicles at different ranges with respect to the camera, varying window sizes have been implemented, with smaller windows meant for vehicles further away and larger windows meant for vehicles close to the camera. Additionally, the window "sliding" is less the a full window width and height, resulting in overlapping windows. This is to ensure that the algorithm does not skip over a vehicle that might be in between windows if the window slide was too large.
 
 After some experimentation, four different window sizes were settled on: small 51x51 pixels, medium 64x64 pixels, big 96x96 pixels, and bigger 128x128 pixels. A 75% overlap was used for sliding the windows in both x and y. The image below is a representation of the different sliding windows sizes and overlaps implemented.
@@ -51,10 +51,10 @@ It should be noted that generating HOG features takes quite a bit of time, espec
 
 Code for this implementation can be found in the `find_cars()` function in the [slidingWindow.py](slidingWindow.py) file.
 
-##Video Implementation
+## Video Implementation
 [Video output can be found here](output.avi)
 
-##Filtering False Positives
+## Filtering False Positives
 While the classifier does a decent job of identifying vehicles on its own, it also generates a few false positives along the way. In order to filter out these false positives, a heat map was implemented with some simple thresholding that removes the positive if there are less than a specified amount of overlapping windows. This is essentially a naïve way to ensure that the classifier is confident of its classification of a given area in the image.
 
 Below are a couple images that show a final output frame, and its corresponding heat map. Note the slightly cooler sections of the heat map that do not make it past the threshold and into the final output.
@@ -64,7 +64,7 @@ Below are a couple images that show a final output frame, and its corresponding 
 
 The heat map implementation can be found in the [heatMap.py](heatMap.py) file and in the video pipeline in the [main.py](main.py) file.
 
-##Discussion
+## Discussion
 In this project, an image processing and classification pipeline was implemented in python to detect and track vehicles for highway driving. While the implementation was successful, there are a few issues that should be considered in the future.
 
 The first and foremost issue is the run time of the algorithm. Extracting HOG features is computationally heavy (although I noticed significant changes with parameter tuning) and causes the algorithm to run at a slower than real-time speed. This issue is exasperated when considering many different windows of different sizes. Perhaps a deep learning algorithm would be a better and faster solution.
