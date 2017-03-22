@@ -187,8 +187,8 @@ if 'pipeline_video' in options:
     cap = cv2.VideoCapture(video_path)
 
     # Open video writer
-    fourcc = cv2.VideoWriter_fourcc(*'DIVX')
-    videoout = cv2.VideoWriter('output.avi',fourcc, 30.0,( 1280,720))
+    # fourcc = cv2.VideoWriter_fourcc(*'DIVX')
+    # videoout = cv2.VideoWriter('output.avi',fourcc, 30.0,( 1280,720))
 
     frame = 0
     t = time.time()
@@ -197,8 +197,8 @@ if 'pipeline_video' in options:
         if not ret:
             break
         frame+=1
-        # if frame < 200:
-        #     continue
+        if frame < 200:
+            continue
         # if frame % 10 == 0:
         #     continue
         if frame % 100 == 0:
@@ -226,13 +226,13 @@ if 'pipeline_video' in options:
         draw_img = draw_labeled_bboxes(np.copy(img), labels)
 
         #Write to output video
-        videoout.write(draw_img)
+        # videoout.write(draw_img)
 
-        # cv2.imshow("Boxed", draw_img)
-        # cv2.imshow("HeatMap", heatmap)
-        # cv2.imshow("window_img", window_img)
-        # if cv2.waitKey(1) & 0xFF == ord('q'):
-        #     break
+        cv2.imshow("Boxed", draw_img)
+        cv2.imshow("HeatMap", heatmap)
+        cv2.imshow("window_img", window_img)
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+            break
     cap.release()
     cv2.destroyAllWindows()
     t2 = time.time()
