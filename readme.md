@@ -1,6 +1,11 @@
 - [Udacity SDC Project 5 - Vehicle Detection and Tracking](#)
   - [Feature Extraction](#feature-extraction)
-
+  - [Classifier Training](#classifier-training)
+  - [Sliding Window](#sliding-window)
+  - [Video Implementation](#video-implementation)
+  - [Filtering False Positives](#filtering-false-positives)
+  - [Discussion](#discussion)
+  
 #Udacity SDC Project 5 - Vehicle Detection and Tracking
 
 In this project for Udacity's Self-Driving Car Nanodegree, an image processing and classification pipeline was implemented in python to detect and track vehicles for highway driving. Given for the project was a video of highway driving from the perspective of a forward facing camera centered on the vehicle. Additionally, a set of labeled images for both vehicles and non-vehicles was provided for classifier training.
