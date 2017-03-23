@@ -30,7 +30,7 @@ There are a few parameters that I spent time tuning to improve HOG feature extra
 
 Below are example images of a randomly selected training car image, and a randomly selected not car image. Each channel has been extracted using the `get_hog_features()` function found in the [imageProcessing.py](imageProcessing.py) file. The parameters for feature extraction can be found in the [main.py](main.py) file. The HOG visualization comes from the scikit HOG function's built in visualization output.
 
-![vehicle_HOG](Images/vehicle HOG.png)
+![vehicle_HOG](Images/vehicle_HOG.png)
 ![not_vehicle_HOG](Images/not_vehicle_HOG.png)
 
 Additional feature extraction was implemented using binned color features, as well as histograms of color. Parameters for this include spatial size (final value: (32,32)), and number of histgram bins (final value: 32). This implementation can be found in the `bin_spatial()` and `color_hist()` functions in the [imageProcessing.py](imageProcessing.py) file.
@@ -41,11 +41,11 @@ All parameters started at values suggested by Udacity lectures (and in some case
 I chose, per Udacity's suggestion, to use a Linear SVM classifier. Scikit was utilized again, specifically the [liner support vector classifier module](http://scikit-learn.org/stable/modules/generated/sklearn.svm.LinearSVC.html#sklearn.svm.LinearSVC) with default parameters. The implementation can be found in the `train_classifier()` function in the [main.py](main.py) file. Additionally, [scikit's standard scalar module](http://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.StandardScaler.html) was utilized to scale the extracted features to zero mean and unit variance.
 
 ## Sliding Window
-To search for cars using a trained classifier, a sliding window algorithm was implemented that searches specific areas of an image and predicts a binary (car or no car) value for that area. In order to capture vehicles at different ranges with respect to the camera, varying window sizes have been implemented, with smaller windows meant for vehicles further away and larger windows meant for vehicles close to the camera. Additionally, the window "sliding" is less the a full window width and height, resulting in overlapping windows. This is to ensure that the algorithm does not skip over a vehicle that might be in between windows if the window slide was too large.
+To search for cars using a trained classifier, a sliding window algorithm was implemented that searches specific areas of an image and predicts a binary (car or no car) value for that area. In order to capture vehicles at different ranges with respect to the camera, varying window sizes have been implemented, with smaller windows meant for vehicles further away and larger windows meant for vehicles close to the camera. Additionally, the window "sliding" is less then the full window width and height, resulting in overlapping windows. This is to ensure that the algorithm does not skip over a vehicle that might be in between windows if the window slide was too large.
 
 After some experimentation, four different window sizes were settled on: small 51x51 pixels, medium 64x64 pixels, big 96x96 pixels, and bigger 128x128 pixels. A 75% overlap was used for sliding the windows in both x and y. The image below is a representation of the different sliding windows sizes and overlaps implemented.
 
-![Sliding Window](Images/Sliding Window.png)
+![Sliding Window](Images/SlidingWindow.png)
 
 It should be noted that generating HOG features takes quite a bit of time, especially when generating HOG features for every window. For this reason, a faster approach was implemented that only needs to generate HOG features once (in the region of interest), and subsamples the HOG features for each specific window location. In order to do this, each image needs to be scaled to properly match the sliding window size being tested.
 
